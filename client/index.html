@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>High Scores</title>
+</head>
+<body>
+    <form>
+        <p>Name: <input type="text" name="name"></p>
+        <p>Score: <input type="text" name="score"></p>
+        <button id="submit-score" type="submit">Submit</button>
+    </form>
+
+    <h2>Highscores</h2>
+    <ul id="high-score-list"></ul>
+</body>
+
+<script>
+    let highScoresList = document.getElementById("high-score-list");
+    let button = document.getElementById("submit-score");
+
+    const addItemToList = (data) => {
+        let listItemElement = document.createElement("li");
+        let content = document.createTextNode(`Name: ${data.name} Score: ${data.score}`);
+        listItemElement.appendChild(content);
+        highScoresList.appendChild(listItemElement);
+    }
+    
+    const createList = (data) => {
+        data.map(addItemToList);
+        // for(var i = 0; i < data.length; i++) {
+        //     addItemToList(data[i])
+        // }
+    }
+
+    const getHighScores = () => {
+        fetch("/get-score").then(response => {
+            response.json().then((data) => {
+                createList(data);
+            });
+        });
+    }
+
+    const addHighScore = (e) => {
+        e.preventDefault();
+        let body = {
+            name: document.querySelector('[name="name"]').value, 
+            score: parseInt(document.querySelector('[name="score"]').value, 10)
+        }
+
+        fetch("/add-score", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"}, 
+            body: JSON.stringify(body) 
+        }).then(res => {
+            console.log(res.status);
+            addItemToList(body);
+        });
+    }
+
+    getHighScores();
+
+    button.addEventListener('click', addHighScore);
+    
+</script>
+</html>
